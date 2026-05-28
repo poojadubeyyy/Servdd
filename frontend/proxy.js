@@ -9,18 +9,20 @@ const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
 ]);
 
+const arcjetMode = process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN";
+
 // Arcjet global protection
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
     // Shield WAF - protects against SQL injection, XSS, etc.
     shield({
-      mode: "LIVE", // Change to "DRY_RUN" to test without blocking
+      mode: arcjetMode,
     }),
 
     // Bot detection - allow search engines, block malicious bots
     detectBot({
-      mode: "LIVE",
+      mode: arcjetMode,
       allow: [
         "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc.
         "CATEGORY:PREVIEW", // Link previews (Slack, Discord, etc.)

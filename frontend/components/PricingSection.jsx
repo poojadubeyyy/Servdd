@@ -1,7 +1,8 @@
+"use client";
+
 import React from "react";
 import { Check } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { CheckoutButton } from "@clerk/nextjs/experimental";
+import { PricingTable } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 export default function PricingSection({ subscriptionTier = "free" }) {
+  const billingEnabled =
+    process.env.NEXT_PUBLIC_CLERK_BILLING_ENABLED === "true";
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-16">
@@ -106,39 +110,21 @@ export default function PricingSection({ subscriptionTier = "free" }) {
           </CardContent>
 
           <CardFooter>
-            <SignedIn>
-              <CheckoutButton
-                planId="cplan_37y5uChZ9uYauQyTlDkXDh997ht"
-                planPeriod="month"
-                newSubscriptionRedirectUrl="/dashboard"
-                checkoutProps={{
-                  appearance: {
-                    elements: {
-                      drawerRoot: {
-                        zIndex: 2000,
-                      },
-                    },
-                  },
-                }}
-              >
-                <Button
-                  disabled={subscriptionTier === "pro"}
-                  className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 disabled:cursor-not-allowed text-white"
-                >
-                  {subscriptionTier === "pro" ? "Subscribed" : "Subscribe Now"}
-                </Button>
-              </CheckoutButton>
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button variant="primary" className="w-full">
-                  Login to Subscribe
-                </Button>
-              </SignInButton>
-            </SignedOut>
+            <Button
+              disabled
+              className="w-full bg-orange-600 disabled:bg-orange-400 disabled:cursor-not-allowed text-white"
+            >
+              {subscriptionTier === "pro" ? "Subscribed" : "Choose Below"}
+            </Button>
           </CardFooter>
         </Card>
       </div>
+
+      {billingEnabled && (
+        <div className="mt-10">
+          <PricingTable />
+        </div>
+      )}
     </div>
   );
 }

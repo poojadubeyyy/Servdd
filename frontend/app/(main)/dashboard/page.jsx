@@ -7,15 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import {
   getRecipeOfTheDay,
   getCategories,
-  getAreas,
+  getAreasWithImages,
 } from "@/actions/mealdb.actions";
-import { getCategoryEmoji, getCountryFlag } from "@/lib/data";
+import {
+  getCategoryEmoji,
+  getCountryFlag,
+} from "@/lib/data";
 
 export default async function DashboardPage() {
   // Fetch data server-side
   const recipeData = await getRecipeOfTheDay();
   const categoriesData = await getCategories();
-  const areasData = await getAreas();
+  const areasData = await getAreasWithImages();
 
   const recipeOfTheDay = recipeData?.recipe;
   const categories = categoriesData?.categories || [];
@@ -167,25 +170,55 @@ export default async function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {areas.map((area) => (
-              <Link
-                key={area.strArea}
-                href={`/recipes/cuisine/${area.strArea
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}`}
-              >
-                <div className="bg-stone-50 p-5 border-2 border-stone-200 hover:border-orange-600 hover:shadow-lg transition-all group cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">
-                      {getCountryFlag(area.strArea)}
-                    </span>
-                    <span className="font-bold text-stone-900 group-hover:text-orange-600 transition-colors text-sm">
-                      {area.strArea}
-                    </span>
+            {areas.map((area, index) => {
+              return (
+                <Link
+                  key={`${area.strArea}-${index}`}
+                  href={`/recipes/cuisine/${area.strArea
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")}`}
+                >
+                  <div className="bg-white border-2 border-stone-200 hover:border-orange-600 hover:shadow-lg transition-all group cursor-pointer overflow-hidden">
+                    {area.previewImage ? (
+                      <div className="relative aspect-4/3">
+                        <Image
+                          src={area.previewImage}
+                          alt={`${area.strArea} cuisine`}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+                        <div className="absolute left-4 right-4 bottom-4 flex items-center gap-2">
+                          <span className="text-3xl">
+                            {getCountryFlag(area.strArea)}
+                          </span>
+                          <span className="font-bold text-white text-sm drop-shadow">
+                            {area.strArea}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="aspect-4/3 bg-stone-900 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-5xl mb-2">
+                            {getCountryFlag(area.strArea)}
+                          </div>
+                          <div className="font-bold text-white text-sm">
+                            {area.strArea}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <p className="text-xs text-stone-500 line-clamp-1">
+                        {area.previewMeal || `Explore ${area.strArea} recipes`}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </section>
       </div>

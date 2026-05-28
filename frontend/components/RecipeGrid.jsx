@@ -16,14 +16,19 @@ export default function RecipeGrid({
 
   useEffect(() => {
     if (value) {
-      // Capitalize first letter for API call
-      const formattedValue = value.charAt(0).toUpperCase() + value.slice(1);
+      const decodedValue = decodeURIComponent(value).replace(/-/g, " ");
+      const formattedValue = decodedValue
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
       fetchMeals(formattedValue);
     }
   }, [value]);
 
   const meals = data?.meals || [];
-  const displayName = value?.replace(/-/g, " "); // Convert "saudi-arabian" to "saudi arabian"
+  const displayName = value?.replace(/-/g, " ");
 
   return (
     <div className="min-h-screen bg-stone-50 pt-14 pb-16 px-4">
