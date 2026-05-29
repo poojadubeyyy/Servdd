@@ -518,9 +518,9 @@ export async function getRecipesByPantryIngredients() {
       throw new Error("Request denied");
     }
 
-    // Get user's pantry items
+    // Get user's pantry items (filter by clerkId field)
     const pantryResponse = await fetch(
-      `${STRAPI_URL}/api/pantry-items?filters[owner][id][$eq]=${user.id}`,
+      `${STRAPI_URL}/api/pantry-items?filters[clerkId][$eq]=${user.clerkId}`,
       {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
