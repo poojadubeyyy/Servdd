@@ -160,10 +160,13 @@ export async function saveToPantry(formData) {
             name: ingredient.name,
             quantity: ingredient.quantity,
             imageUrl: "",
-            owner: user.id,
           },
         }),
       });
+
+      if (!response.ok) {
+        console.log(await response.text());
+      }
 
       if (response.ok) {
         const data = await response.json();
