@@ -520,7 +520,7 @@ export async function getRecipesByPantryIngredients() {
 
     // Get user's pantry items
     const pantryResponse = await fetch(
-      `${STRAPI_URL}/api/pantry-items?filters[owner][id][$eq]=${user.id}`,
+      `${STRAPI_URL}/api/pantry-items?sort=createdAt:desc`,
       {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
