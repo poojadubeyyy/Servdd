@@ -74,67 +74,24 @@ export const checkUser = async () => {
       return { ...existingUser, subscriptionTier };
     }
 
-    const rolesResponse = await fetch(
-      `${STRAPI_URL}/api/users-permissions/roles`,
-      {
-        headers: {
-          Authorization: `Bearer ${STRAPI_API_TOKEN}`,
-        },
-        cache: "no-store",
-      }
-    );
+    // User doesn't exist in Strapi yet.
+    // Since Clerk handles auth, we don't need to create auth users in Strapi.
+    // Strapi is used as a CMS/database only for recipes, pantry items, etc.
+    // Return Clerk user data with subscription tier.
+    console.log("ℹ️ User not found in Strapi. Using Clerk user data.");
 
-    if (!rolesResponse.ok) {
-      const errorText = await rolesResponse.text();
-      console.error("❌ Strapi /api/users-permissions/roles failed:", errorText);
-      return null;
-    }
-
-    const rolesData = await rolesResponse.json();
-    const authenticatedRole = rolesData.roles?.find(
-      (role) => role.type === "authenticated"
-    );
-
-    if (!authenticatedRole) {
-      console.error("❌ Authenticated role not found");
-      return null;
-    }
-
-    const userData = {
+    return {
+      id: null, // No Strapi ID yet
+      clerkId: user.id,
+      email: user.emailAddresses?.[0]?.emailAddress || "",
       username:
         user.username || user.emailAddresses?.[0]?.emailAddress?.split("@")[0] ||
         `clerk-${user.id}`,
-      email: user.emailAddresses?.[0]?.emailAddress || "",
-      password: `clerk_managed_${user.id}_${Date.now()}`,
-      confirmed: true,
-      blocked: false,
-      role: authenticatedRole.id,
-      clerkId: user.id,
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       imageUrl: user.imageUrl || "",
       subscriptionTier,
     };
-
-    const newUserResponse = await fetch(`${STRAPI_URL}/api/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${STRAPI_API_TOKEN}`,
-      },
-      body: JSON.stringify({ data: userData }),
-    });
-
-    if (!newUserResponse.ok) {
-      const errorText = await newUserResponse.text();
-      console.error("❌ Strapi user creation failed:", errorText);
-      return null;
-    }
-
-    const newUserJson = await newUserResponse.json();
-    const createdUser = normalizeStrapiUser(newUserJson.data);
-
-    return createdUser;
   } catch (error) {
     console.error("❌ Error in checkUser:", error);
     return null;
