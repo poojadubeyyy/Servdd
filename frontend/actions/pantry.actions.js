@@ -160,7 +160,7 @@ export async function saveToPantry(formData) {
             name: ingredient.name,
             quantity: ingredient.quantity,
             imageUrl: "",
-            clerkId: user.clerkId,
+            owner: user.id,
           },
         }),
       });
@@ -211,7 +211,7 @@ export async function addPantryItemManually(formData) {
           name: name.trim(),
           quantity: quantity.trim(),
           imageUrl: "",
-          clerkId: user.clerkId,
+          owner: user.id,
         },
       }),
     });
@@ -248,7 +248,7 @@ export async function getPantryItems() {
     }
 
     const response = await fetch(
-      `${STRAPI_URL}/api/pantry-items?filters[clerkId][$eq]=${user.clerkId}&sort=createdAt:desc`,
+      `${STRAPI_URL}/api/pantry-items?filters[owner][id][$eq]=${user.id}&sort=createdAt:desc`,
       {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
