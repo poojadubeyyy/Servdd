@@ -171,6 +171,13 @@ export async function saveToPantry(formData) {
       }
     }
 
+    // If nothing was saved, surface an error so the UI can show a helpful message
+    if (savedItems.length === 0) {
+      // Try to capture last response body for debugging
+      console.error("No pantry items were saved to Strapi. Check STRAPI_API_TOKEN and request payloads.");
+      throw new Error("Failed to save items to pantry. Please check your Strapi configuration and try again.");
+    }
+
     return {
       success: true,
       savedItems,
