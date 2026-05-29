@@ -68,7 +68,10 @@ export async function getOrGenerateRecipe(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const recipeName = formData.get("recipeName");
@@ -342,7 +345,10 @@ export async function saveRecipeToCollection(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const recipeId = formData.get("recipeId");
@@ -414,7 +420,10 @@ export async function removeRecipeFromCollection(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const recipeId = formData.get("recipeId");
@@ -479,7 +488,11 @@ export async function getRecipesByPantryIngredients() {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        recipes: [],
+        error: "Please sign in",
+      };
     }
 
     // ✅ ARCJET RATE LIMIT CHECK
@@ -598,7 +611,12 @@ export async function getSavedRecipes() {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        recipes: [],
+        count: 0,
+        error: "Please sign in",
+      };
     }
 
     // Fetch saved recipes with populated recipe data

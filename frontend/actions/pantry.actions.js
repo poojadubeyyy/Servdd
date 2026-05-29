@@ -6,7 +6,7 @@ import { freePantryScans, proTierLimit } from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 
 const STRAPI_URL =
-  process.env.STRAPI_URL || "http://localhost:1337";
+  process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -17,7 +17,10 @@ export async function scanPantryImage(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     // Check if user is Pro
@@ -130,7 +133,10 @@ export async function saveToPantry(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const ingredientsJson = formData.get("ingredients");
@@ -181,7 +187,10 @@ export async function addPantryItemManually(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const name = formData.get("name");
@@ -231,7 +240,11 @@ export async function getPantryItems() {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        items: [],
+        error: "Please sign in",
+      };
     }
 
     const response = await fetch(
@@ -268,7 +281,10 @@ export async function deletePantryItem(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const itemId = formData.get("itemId");
@@ -299,7 +315,10 @@ export async function updatePantryItem(formData) {
   try {
     const user = await checkUser();
     if (!user) {
-      throw new Error("User not authenticated");
+      return {
+        success: false,
+        error: "Please sign in",
+      };
     }
 
     const itemId = formData.get("itemId");
