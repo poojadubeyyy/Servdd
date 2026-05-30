@@ -291,7 +291,6 @@ Guidelines:
         substitutions: recipeData.substitutions,
         imageUrl: imageUrl || "",
         isPublic: true,
-        clerkId: user.clerkId || user.id,
       },
     };
 
