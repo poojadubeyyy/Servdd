@@ -256,6 +256,9 @@ export async function getPantryItems() {
       };
     }
 
+    console.log("TOKEN EXISTS:", !!STRAPI_API_TOKEN);
+    console.log("TOKEN LENGTH:", STRAPI_API_TOKEN?.length);
+
     const response = await fetch(
       `${STRAPI_URL}/api/pantry-items?sort=createdAt:desc`,
       {
