@@ -105,20 +105,22 @@ export async function getOrGenerateRecipe(formData) {
         console.log("✅ Recipe found in database:", searchData.data[0].id);
 
         // Check if user has saved this recipe
-        const savedRecipeResponse = await fetch(
-          `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.id}&filters[recipe][id][$eq]=${searchData.data[0].id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${STRAPI_API_TOKEN}`,
-            },
-            cache: "no-store",
-          }
-        );
-
         let isSaved = false;
-        if (savedRecipeResponse.ok) {
-          const savedData = await savedRecipeResponse.json();
-          isSaved = savedData.data && savedData.data.length > 0;
+        if (user.strapiId) {
+          const savedRecipeResponse = await fetch(
+            `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.strapiId}&filters[recipe][id][$eq]=${searchData.data[0].id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+              },
+              cache: "no-store",
+            }
+          );
+
+          if (savedRecipeResponse.ok) {
+            const savedData = await savedRecipeResponse.json();
+            isSaved = savedData.data && savedData.data.length > 0;
+          }
         }
 
         return {
@@ -356,8 +358,14 @@ export async function saveRecipeToCollection(formData) {
     }
 
     // Check if already saved
+    if (!user.strapiId) {
+      throw new Error(
+        "Unable to save recipe because the user is not synchronized with Strapi."
+      );
+    }
+
     const existingResponse = await fetch(
-      `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.id}&filters[recipe][id][$eq]=${recipeId}`,
+      `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.strapiId}&filters[recipe][id][$eq]=${recipeId}`,
       {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
@@ -386,7 +394,7 @@ export async function saveRecipeToCollection(formData) {
       },
       body: JSON.stringify({
         data: {
-          user: user.id,
+          user: user.strapiId,
           recipe: recipeId,
           savedAt: new Date().toISOString(),
         },
@@ -431,8 +439,14 @@ export async function removeRecipeFromCollection(formData) {
     }
 
     // Find saved recipe relation
+    if (!user.strapiId) {
+      throw new Error(
+        "Unable to remove recipe because the user is not synchronized with Strapi."
+      );
+    }
+
     const searchResponse = await fetch(
-      `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.id}&filters[recipe][id][$eq]=${recipeId}`,
+      `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.strapiId}&filters[recipe][id][$eq]=${recipeId}`,
       {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
@@ -619,8 +633,14 @@ export async function getSavedRecipes() {
     }
 
     // Fetch saved recipes with populated recipe data
+    if (!user.strapiId) {
+      throw new Error(
+        "Unable to load saved recipes because the user is not synchronized with Strapi."
+      );
+    }
+
     const response = await fetch(
-      `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.id}&populate[recipe][populate]=*&sort=savedAt:desc`,
+      `${STRAPI_URL}/api/saved-recipes?filters[user][id][$eq]=${user.strapiId}&populate[recipe][populate]=*&sort=savedAt:desc`,
       {
         headers: {
           Authorization: `Bearer ${STRAPI_API_TOKEN}`,
