@@ -112,7 +112,7 @@ async function updateStrapiUser(strapiId, updateData) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${STRAPI_API_TOKEN}`,
     },
-    body: JSON.stringify({ data: updateData }),
+    body: JSON.stringify(updateData),
   });
 
   if (!response.ok) {
@@ -192,6 +192,12 @@ export const checkUser = async () => {
 
   try {
     const strapiUser = await getOrCreateStrapiUser(user, subscriptionTier);
+
+    console.log("USER DATA", {
+      clerkId: user.id,
+      strapiId: strapiUser?.id,
+    });
+
     return {
       ...baseUser,
       strapiId: strapiUser?.id ?? null,
