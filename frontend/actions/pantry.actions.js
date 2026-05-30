@@ -267,6 +267,8 @@ export async function getPantryItems() {
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Strapi pantry fetch error:", errorText);
       throw new Error("Failed to fetch pantry items");
     }
 
