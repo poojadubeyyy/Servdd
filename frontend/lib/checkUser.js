@@ -22,7 +22,7 @@ async function fetchStrapiUserByClerkId(clerkId) {
   }
 
   const data = await response.json();
-  return data?.data?.[0] ?? null;
+  return data?.[0] ?? null;
 }
 
 async function fetchStrapiUserByEmail(email) {
@@ -44,7 +44,7 @@ async function fetchStrapiUserByEmail(email) {
   }
 
   const data = await response.json();
-  return data?.data?.[0] ?? null;
+  return data?.[0] ?? null;
 }
 
 async function createStrapiUser(clerkUser, subscriptionTier) {
@@ -53,6 +53,18 @@ async function createStrapiUser(clerkUser, subscriptionTier) {
     clerkUser.username ||
     email?.split("@")[0] ||
     `clerk-${clerkUser.id}`;
+
+  if (email) {
+    const existingUser = await fetchStrapiUserByEmail(email);
+    if (existingUser) {
+      console.log("⚠️ Existing Strapi user found by email before create:", {
+        clerkId: clerkUser.id,
+        email,
+        existingUserId: existingUser.id,
+      });
+      return existingUser;
+    }
+  }
 
   const rolesResponse = await fetch(`${STRAPI_URL}/api/users-permissions/roles`, {
     headers: {
@@ -128,8 +140,15 @@ async function updateStrapiUser(strapiId, updateData) {
 async function getOrCreateStrapiUser(clerkUser, subscriptionTier) {
   if (!STRAPI_API_TOKEN) return null;
 
+  const email = clerkUser.emailAddresses?.[0]?.emailAddress;
+  console.log("🔍 Searching Strapi user:", {
+    clerkId: clerkUser.id,
+    email,
+  });
+
   let strapiUser = await fetchStrapiUserByClerkId(clerkUser.id);
   if (strapiUser) {
+    console.log("📦 Found by clerkId:", strapiUser);
     if (
       strapiUser.attributes?.subscriptionTier !== subscriptionTier ||
       strapiUser.attributes?.clerkId !== clerkUser.id
@@ -144,10 +163,10 @@ async function getOrCreateStrapiUser(clerkUser, subscriptionTier) {
     return strapiUser;
   }
 
-  const email = clerkUser.emailAddresses?.[0]?.emailAddress;
   if (email) {
     strapiUser = await fetchStrapiUserByEmail(email);
     if (strapiUser) {
+      console.log("📦 Found by email:", strapiUser);
       const updated = await updateStrapiUser(strapiUser.id, {
         clerkId: clerkUser.id,
         subscriptionTier,
