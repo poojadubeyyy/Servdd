@@ -266,13 +266,15 @@ export async function getPantryItems() {
       }
     );
 
+    const responseText = await response.text();
+    console.log("STATUS:", response.status);
+    console.log("BODY:", responseText);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Strapi pantry fetch error:", errorText);
       throw new Error("Failed to fetch pantry items");
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
 
     const isPro = user.subscriptionTier === "pro";
 
