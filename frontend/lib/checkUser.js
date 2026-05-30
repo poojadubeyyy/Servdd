@@ -105,11 +105,42 @@ async function createStrapiUser(clerkUser, subscriptionTier) {
   return newUser?.data ?? null;
 }
 
+async function updateStrapiUser(strapiId, updateData) {
+  const response = await fetch(`${STRAPI_URL}/api/users/${strapiId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${STRAPI_API_TOKEN}`,
+    },
+    body: JSON.stringify({ data: updateData }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("❌ Error updating Strapi user:", errorText);
+    return null;
+  }
+
+  const data = await response.json();
+  return data?.data ?? null;
+}
+
 async function getOrCreateStrapiUser(clerkUser, subscriptionTier) {
   if (!STRAPI_API_TOKEN) return null;
 
   let strapiUser = await fetchStrapiUserByClerkId(clerkUser.id);
   if (strapiUser) {
+    if (
+      strapiUser.attributes?.subscriptionTier !== subscriptionTier ||
+      strapiUser.attributes?.clerkId !== clerkUser.id
+    ) {
+      const updated = await updateStrapiUser(strapiUser.id, {
+        clerkId: clerkUser.id,
+        subscriptionTier,
+      });
+      return updated ?? strapiUser;
+    }
+
     return strapiUser;
   }
 
@@ -117,7 +148,11 @@ async function getOrCreateStrapiUser(clerkUser, subscriptionTier) {
   if (email) {
     strapiUser = await fetchStrapiUserByEmail(email);
     if (strapiUser) {
-      return strapiUser;
+      const updated = await updateStrapiUser(strapiUser.id, {
+        clerkId: clerkUser.id,
+        subscriptionTier,
+      });
+      return updated ?? strapiUser;
     }
   }
 
